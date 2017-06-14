@@ -1,0 +1,58 @@
+<html>
+<head>
+<title>AA&amp;P - 7</title>
+</head>
+<body><center><br>
+<table border=0>
+<tr><td style="font-size:30px;text-align:center">my_home/lib/MyHome.pm</td>
+<td style="font-size:30px;text-align:center">my_home.conf</td></tr>
+<tr><td style="font: 20px georgia"><xmp style="border:3px solid black;padding:6px">package MyHome;
+use Mojo::Base 'Mojolicious';
+use Net::Amazon::Alexa::Dispatch;
+
+# This method will run once at server start
+sub startup {
+    my $self = shift;
+    my $config = $self->plugin('Config');
+
+    # Router
+    my $r = $self->routes;
+
+    # Normal route to controller
+    $r->any('/MyHome/alexa_linking')
+        ->to('alexa#auth_alexa_user');
+
+    my $auth_alexa = $r->under->to('alexa#auth_alexa');
+    $auth_alexa->any('/MyHome/alexa')
+        ->to('alexa#run_method');
+}
+
+1;
+</xmp>
+</td>
+<td style="font: 20px georgia"><xmp style="border:3px solid black;padding:6px">{
+  hypnotoad => {
+    listen  => ['https://[::]:443?key=key.pem&cert=cert.pem'],
+    pid_file => '/var/run/alexa_my_home.pid',
+    accepts => 10,
+    workers => 2,
+  },
+  "Amazon::Alexa::Dispatch" => {
+    "alexa_token" => "shh it's a secret",
+    "max_token_age" => 50000,
+    "dispatch" => ["Amazon::Alexa::Bravia","Amazon::Alexa::Dispatch"],
+  },
+  "Amazon::Alexa::Bravia" => {
+    "ip" => {
+        "upstairs" => "10.0.0.123",
+        "downstairs" => "10.0.0.124",
+    },
+    "default_ip" => "upstairs",
+    "alexa_token" => "shh it's a secret",
+    "X-Auth-PSK" => "12345",
+  },
+}
+</xmp>
+</td></tr></td></tr></table>
+<body>
+</html>

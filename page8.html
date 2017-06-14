@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>AA&amp;P - 8</title>
+</head>
+<body><center><br>
+<table border=0>
+<tr><td style="font-size:30px;text-align:center">my_home/lib/MyHome/Controller/Alexa.pm</td>
+<td style="font-size:30px;text-align:center">Net::Amazon::Alexa::Dispatch</td></tr>
+<tr><td style="font: 20px georgia"><xmp style="border:3px solid black;padding:6px">sub auth_alexa {
+    my $self = shift;
+    my $config = $self->config;
+    my $alexa = Amazon::Alexa::Dispatch->new($config);
+    my $json = $self->req->json;
+    my $auth = eval { $alexa->alexa_authenticate_json($json); };
+    my $e = $@;
+    return 1 if $auth;
+    $e = { error => $e } unless ref $e eq 'Throw';
+    $self->render(
+        json => $alexa->msg_to_hash($e,'Not authorized'),
+        status=>401
+    );
+    return undef;
+}
+
+sub run_method {
+    my $self = shift;
+    local $SIG{__WARN__} = sub { $self->alexa_log(@_); };
+    my $config = $self->config;
+    my $alexa = Amazon::Alexa::Dispatch->new($config);
+    my $json = $self->req->json;
+    my $ret = eval { $alexa->run_method($json) };
+    $self->render(json => $alexa->msg_to_hash($ret,'Unknown response'));
+}</xmp>
+</td>
+<td style="font: 20px georgia"><xmp style="border:3px solid black;padding:6px">sub run_method {
+    my ($self, $json) = @_;
+
+    # this really should be run well before a run_method is called
+    # but just in case it wasn't we run it here
+    $self->alexa_authenticate_json($json);
+
+    my $ret = eval {
+        my $method = $json->{'request'}->{'intent'}->{'name'};
+        my ($module,$full_method) = $self->_find_module($method);
+
+        my $obj = eval{ $module->new($self->{'config'}); }
+            or throw "Skill plugin could not be initialized", {
+                cause => $@,
+                alexa_safe => 1,
+            };
+        $obj->$full_method($json);
+    };
+    my $e = $@;
+    if ($e) {
+        warn $e;
+        $ret = { error => $e };
+    }
+    return $self->msg_to_hash($ret);
+}</xmp>
+</td></tr></td></tr></table>
+<body>
+</html>
