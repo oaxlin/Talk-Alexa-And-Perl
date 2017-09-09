@@ -37,12 +37,12 @@ sub startup {
     accepts => 10,
     workers => 2,
   },
-  "Amazon::Alexa::Dispatch" => {
+  "Net::Amazon::Alexa::Dispatch" => {
     "alexa_token" => "shh it's a secret",
     "max_token_age" => 50000,
-    "dispatch" => ["Amazon::Alexa::Bravia","Amazon::Alexa::Dispatch"],
+    "dispatch" => ["Net::Amazon::Alexa::Bravia","Net::Amazon::Alexa::Dispatch"],
   },
-  "Amazon::Alexa::Bravia" => {
+  "Net::Amazon::Alexa::Bravia" => {
     "ip" => {
         "upstairs" => "10.0.0.123",
         "downstairs" => "10.0.0.124",
