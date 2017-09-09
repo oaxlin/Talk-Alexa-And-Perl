@@ -9,7 +9,7 @@
 <tr><td style="font: 20px georgia"><xmp style="border:3px solid black;padding:6px">sub auth_alexa {
     my $self = shift;
     my $config = $self->config;
-    my $alexa = Amazon::Alexa::Dispatch->new($config);
+    my $alexa = Net::Amazon::Alexa::Dispatch->new($config);
     my $json = $self->req->json;
     my $auth = eval { $alexa->alexa_authenticate_json($json); };
     my $e = $@;
@@ -26,7 +26,7 @@ sub run_method {
     my $self = shift;
     local $SIG{__WARN__} = sub { $self->alexa_log(@_); };
     my $config = $self->config;
-    my $alexa = Amazon::Alexa::Dispatch->new($config);
+    my $alexa = Net::Amazon::Alexa::Dispatch->new($config);
     my $json = $self->req->json;
     my $ret = eval { $alexa->run_method($json) };
     $self->render(json => $alexa->msg_to_hash($ret,'Unknown response'));
